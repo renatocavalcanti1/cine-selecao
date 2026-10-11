@@ -1,4 +1,12 @@
 import { test, expect } from '@playwright/test';
+
+test('Temporadas menu reaches the section when no seasons are available',async({page})=>{
+ await page.getByRole('banner').getByRole('link',{name:'Temporadas',exact:true}).click();
+ await expect(page).toHaveURL(/\/#novas-temporadas$/);
+ const section=page.locator('#novas-temporadas');
+ await expect(section.getByRole('heading',{name:'Novas temporadas',exact:true})).toBeInViewport();
+ await expect(section.getByText('Nenhuma nova temporada confirmada nos títulos carregados.')).toBeVisible();
+});
 test('streaming icons are centered in details',async({page})=>{
  await page.getByRole('link',{name:'Ruptura',exact:true}).click();
  const group=page.locator('.detail-grid aside .watch-icons');

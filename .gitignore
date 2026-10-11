@@ -15,6 +15,7 @@
 /.next-e2e/
 /test-results/
 /playwright-report/
+/.playwright-browsers/
 /test-run.log
 *.tsbuildinfo
 

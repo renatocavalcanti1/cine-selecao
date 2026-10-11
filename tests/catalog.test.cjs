@@ -31,6 +31,30 @@ const detail = require('../app/obra/[slug]/page.tsx');
 const {titles} = require('../app/titles.ts');
 afterEach(cleanup);
 const openHome = () => {render(React.createElement(Home));return userEvent.setup();};
+test('season navigation has a destination even without matching titles',async()=>{
+ const user=openHome();
+ const section=document.getElementById('novas-temporadas');
+ assert.ok(section);
+ assert.equal(screen.getByRole('link',{name:'Temporadas',exact:true}).getAttribute('href'),'/#novas-temporadas');
+ assert.ok(within(section).getByText('Nenhuma nova temporada confirmada nos títulos carregados.'));
+ await user.type(screen.getByRole('textbox',{name:'Buscar por título'}),'nenhuma obra');
+ assert.ok(screen.getByText('Nenhum título encontrado'));
+ assert.ok(document.getElementById('novas-temporadas'));
+});
+
+test('pagination preserves confirmed seasons when a duplicate arrives in another group',async()=>{
+ const original=global.fetch;
+ const season={...titles[0],discovery:'season',seasonLabel:'Temporada 2 · estreia confirmada'};
+ global.fetch=async()=>Response.json({titles:[{...season,discovery:'trending',seasonLabel:undefined}],hasMore:false});
+ try{
+  render(React.createElement(Home,{titles:[season],remote:true}));
+  await userEvent.setup().click(screen.getByRole('button',{name:'Carregar mais obras'}));
+  await waitFor(()=>assert.equal(screen.queryByRole('button',{name:'Carregar mais obras'}),null));
+  const section=document.getElementById('novas-temporadas');
+  assert.ok(within(section).getByRole('heading',{name:season.title}));
+  assert.equal(within(section).getAllByRole('article').length,1);
+ }finally{global.fetch=original;}
+});
 const select = async (user, label, value) => {await user.click(screen.getByRole('combobox',{name:label}));await user.click(await screen.findByRole('option',{name:value,exact:true}));};
 
 test('home separates launches from curated works and exposes detail links', () => {

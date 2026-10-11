@@ -110,7 +110,8 @@ test('catalog endpoint rejects invalid pagination before contacting TMDB',async(
 
 test('discovery confirms season premieres and excludes specials, future seasons and weak ratings',async()=>{
  process.env.TMDB_API_KEY='test-key';delete process.env.CINE_E2E;
- const today=new Date().toISOString().slice(0,10);
+ const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+ const today=['year','month','day'].map(type=>parts.find(part=>part.type===type).value).join('-');
  global.fetch=async url=>{
   if(url.pathname.includes('/genre/'))return Response.json({genres:[]});
   if(url.pathname.includes('/trending/'))return Response.json({results:[{id:90,media_type:'movie',title:'Trending',release_date:'2020-01-01'},{id:91,media_type:'person',name:'Person'}]});
